@@ -12,8 +12,14 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       watch: { usePolling: true, interval: 250 },
       proxy: {
-        '/api': { target: env.API_PROXY_TARGET || 'http://host.docker.internal:8080', changeOrigin: true },
-        '/storage': { target: env.API_PROXY_TARGET || 'http://host.docker.internal:8080', changeOrigin: true },
+        '/api': {
+          target: env.API_PROXY_TARGET || 'http://host.docker.internal:8080',
+          changeOrigin: true,
+        },
+        '/storage': {
+          target: env.API_PROXY_TARGET || 'http://host.docker.internal:8080',
+          changeOrigin: true,
+        },
       },
     },
   }
