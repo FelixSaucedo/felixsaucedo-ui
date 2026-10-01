@@ -1,38 +1,94 @@
-# Félix Saucedo · Portfolio UI
+# felixsaucedo-ui
 
-Vue 3.5, TypeScript, Vite 8 y Tailwind CSS v4. El diseño usa como referencia `/home/felix/projectos/career-lab-main/site/index.html`, conservando su estructura, SVG, paleta, tipografías, tarjetas y disposición de las secciones. El contenido profesional procede de la API.
+Esta SPA presenta mi experiencia y mis decisiones técnicas a partir del contenido de la API. La construí con Vue 3.5, Composition API y `<script setup>`, TypeScript estricto, Vite 8 y Tailwind CSS v4. El objetivo de la interfaz es que se pueda leer con facilidad, encontrar el CV y abrir una conversación, sin que los controles del sitio compitan con el contenido.
 
-## Desarrollo y compilación
+La base visual procede de una maqueta HTML: mantuve el monograma, las tipografías, la estructura de secciones y la distinción entre tema claro y oscuro. La adaptación a Vue convirtió esas secciones en colecciones reactivas; los textos profesionales no se copiaron a un segundo catálogo local.
 
-Desde sitio/:
+## Dos tipos de acción, dos lugares
+
+El header conserva identidad, navegación y dos acciones: descargar el CV y contactar. Moví el selector ES/EN y el control de tema a un dock fijo en la esquina inferior derecha. Separar preferencias de acciones de negocio reduce la densidad del header y mantiene los ajustes accesibles durante la lectura.
+
+El dock está implementado en [`App.vue`](src/App.vue), tiene fondo translúcido, borde discreto y variantes para ambos temas. Sus botones exponen semántica de switch, estado `aria-checked` y etiquetas accesibles. El selector de idioma muestra ambas opciones y resalta la elegida; admite teclado sin una implementación de eventos paralela a la del botón nativo.
+
+[`useTheme`](src/composables/useTheme.ts) sigue la preferencia del sistema hasta que el usuario elige una manualmente. Esa elección persiste en `site_theme`. Un script en `index.html` aplica el tema antes de montar Vue para reducir el cambio inicial de paleta. El idioma persiste en `site_lang`; ambos controles toleran que el navegador restrinja `localStorage`.
+
+## Un contrato explícito con la API
+
+Elegí resolver las traducciones profesionales en el servidor. [`usePortfolio`](src/composables/usePortfolio.ts) solicita `/api/v1/portfolio?lang=es|en`; no intenta traducir ni reconstruir secciones a partir del antiguo esquema de Laravel.
+
+[`portfolioContract.ts`](src/lib/portfolioContract.ts) valida la respuesta en ejecución, además de los tipos de compilación. Acepta el objeto directo del backend y el mismo contrato envuelto en `{ data: ... }`. Comprueba estructura, colecciones y colores `#RRGGBB` antes de exponerlos al template.
+
+| Dato recibido | Uso en la interfaz |
+| --- | --- |
+| `hero` | Título, descripción e insignia profesional. |
+| `philosophies` | Icono, texto y acento de cada tarjeta. |
+| `case_studies` | Dilema, solución y badge técnico. |
+| `leadership` | Prácticas de colaboración. |
+| `categories`, `skills` | Filtros y matriz de tecnologías. |
+| `career` | Período, rol y empresa de cada hito. |
+
+El composable comienza con un objeto completo y arreglos vacíos. Distingue carga, fallo de red y timeout de 12 segundos; muestra reintento y registra el error de fetch en consola. Cancela solicitudes anteriores y usa una secuencia para impedir que una respuesta tardía sobrescriba el idioma actual. Conserva una caché en memoria por idioma durante la sesión del componente.
+
+Estos fallbacks evitan errores de renderizado por valores ausentes y permiten conservar contenido ya cargado. No reservan una altura fija para todas las tarjetas: la primera respuesta puede cambiar la altura del documento. No hay una promesa de CLS cero ni cifras de rendimiento que el proyecto no haya medido.
+
+Los rótulos de navegación, formulario y estados viven en [`uiCopy.ts`](src/lib/uiCopy.ts) y [`copy.ts`](src/lib/copy.ts). Esta separación deja el contenido editorial en la base de datos y la interacción de la aplicación en el cliente.
+
+## Colores como datos
+
+La API entrega valores HEX, no clases CSS. El segundo `span` de cada `.tech-item` recibe `skill.accent_color` mediante estilo en línea; el nombre de la tecnología mantiene el color de texto correspondiente al tema. El borde hover usa una variable CSS alimentada por `category.default_accent_color`.
+
+Filosofías y trayectoria usan `accent_color_hex`. Los casos usan `badge_color_hex`; la UI deriva de ese valor la transparencia del fondo y del borde. Así puedo cambiar un acento en la base de datos sin reconstruir un catálogo de clases Tailwind. Las decisiones de layout, contraste y modo oscuro siguen en la UI.
+
+Tailwind se integra mediante `@tailwindcss/vite`, `@theme` y una variante `dark` por clase. El interlineado del hero se declara también en los breakpoints necesarios para conservar el comportamiento de la maqueta anterior. Los SVG están en el markup; no hay una librería de componentes ni de iconos añadida para esta página. Se respeta `prefers-reduced-motion`.
+
+## Contacto y manejo de errores
+
+[`useContact`](src/composables/useContact.ts) envía JSON a `/api/v1/contact` con el honeypot `_hp_company_url` vacío. Impide envíos simultáneos, aplica un timeout de 15 segundos y distingue errores de validación, límite y red. Para `429`, interpreta `Retry-After`; para `422`, identifica campos con errores y prepara mensajes localizados.
+
+`App.vue` conserva el formulario ante un fallo y lo limpia tras la confirmación de recepción. Cambiar idioma o tema no borra lo escrito. La API actual responde `202`; el cliente admite `200`, `201` y `202`. La confirmación significa recepción de la solicitud, no entrega de correo.
+
+## SEO y analítica
+
+[`index.html`](index.html) incluye canonical para `https://felixsaucedo.com/`, Open Graph, Twitter Cards y JSON-LD con `ProfilePage` y `Person`. Google Tag Manager se carga de forma asíncrona mediante `GTM-KC75DLJW`, con su alternativa `noscript`.
+
+Vue actualiza el idioma del documento, la descripción y los locales de Open Graph cuando cambia el contenido. La metadata inicial y el JSON-LD siguen definidos en el HTML para consumidores que no ejecutan la SPA. No hay SSR ni prerendering: el texto principal se obtiene por API después de montar la aplicación. Incluir GTM tampoco implica que haya eventos de conversión personalizados definidos en el código.
+
+Inter y JetBrains Mono se cargan desde Google Fonts. Los enlaces de CV alternan `/Felix_Saucedo_CV_Base.pdf` y `/Felix_Saucedo_CV_Base_EN.pdf`; esos archivos deben colocarse en `public/` y no están incluidos en el checkout actual.
+
+## Desarrollo
+
+La ejecución recomendada usa [portfolio-workspace](https://github.com/FelixSaucedo/portfolio-workspace), donde Nginx sirve UI y API bajo el mismo origen. Desde esa raíz, con la API inicializada:
 
 ```bash
-docker compose up -d ui gateway
+docker compose up -d --build
 docker compose exec ui npm run build
 ```
 
-Abre http://localhost. Vite mantiene polling/HMR por Nginx. No se instalaron herramientas en el host.
+Abre `http://localhost`. Vite utiliza polling para observar archivos montados y el gateway permite HMR por WebSocket.
 
-## Idioma y tema
+Para trabajar con Node 22 sin el workspace, desde este repositorio:
 
-`src/lib/uiCopy.ts` contiene solamente rótulos de interfaz ES/EN: navegación, encabezados de sección, botones, formulario, placeholders y opciones. Hero, filosofías, casos, liderazgo, tecnologías y trayectoria proceden de la API. Vue actualiza ambos tipos de texto sin recargar ni perder los campos. El idioma se guarda en `site_lang`; también se lee la preferencia anterior `felix-portfolio-language` cuando no existe la nueva.
+```bash
+npm ci
+npm run dev
+npm run build
+```
 
-`src/composables/useTheme.ts` alterna claro/oscuro con `site_theme`. La elección manual persiste y prevalece sobre el sistema. Sin preferencia guardada, el tema sigue el sistema operativo. Un script temprano en index.html aplica el tema antes de cargar Vue para evitar el cambio de paleta inicial. Ambos controles siguen funcionando cuando localStorage está restringido.
+También hay un Compose autónomo: `docker compose up -d --build` publica Vite en `localhost:5173`. En ambos casos, el proxy de desarrollo espera una API en `host.docker.internal:8080`, configurable mediante `API_PROXY_TARGET` en el entorno de Vite. Con Node ejecutado directamente en el host, usa `API_PROXY_TARGET=http://localhost:8080`.
 
-Tailwind v4 usa `@custom-variant dark` y `@theme` para reproducir los colores de la referencia de Tailwind v3: oscuro #090d16, tarjetas #0f172a, claro #f8fafc y acentos sky/esmeralda/violeta/ámbar. Se conservan Inter y JetBrains Mono de Google Fonts. Referencia técnica: [modo oscuro de Tailwind](https://tailwindcss.com/docs/dark-mode).
+Las solicitudes del cliente usan rutas relativas `/api/v1/...`. Aunque la infraestructura conserva `VITE_API_BASE_URL`, los composables actuales no leen esa variable; para cambiar el origen hay que ajustar el proxy o el despliegue.
 
-En móviles se muestra el monograma sin el texto largo del logo para dejar espacio a los controles. En escritorio se conserva el logo completo. Se respeta reducción de movimiento.
+## Compilación y verificaciones
 
-## API, contacto y SEO
+`npm run build` ejecuta `vue-tsc -b` antes de Vite. Los errores de tipos bloquean el build. La salida es `dist/`; el Dockerfile de producción la sirve con Nginx y cachea los assets con hash como inmutables.
 
-`usePortfolio` consulta y valida `/api/v1/portfolio?lang=es|en`. Adapta `sections` a `hero`, `philosophies` (slug `philosophy`) y `leadership`; expone `skill_categories` como `skills_by_category` y `career_milestones` como `career`. App.vue renderiza estas colecciones reactivas con `v-for`, sin contenido profesional duplicado en diccionarios locales.
+Con el stack raíz en ejecución:
 
-Al alternar el idioma, las traducciones JSON de la respuesta previa permiten actualizar el contenido inmediatamente mientras se solicita la respuesta nueva. Se cancelan solicitudes anteriores para evitar que una respuesta tardía sobrescriba el idioma elegido. Los campos nulos y las colecciones vacías se manejan sin romper el renderizado. Actualmente la API contiene 15 tecnologías y 3 categorías; la matriz y sus filtros se generan desde esos datos.
+```bash
+docker compose exec ui node --experimental-strip-types --test tests/portfolio-contract.test.mjs
+docker compose exec ui npm run build
+```
 
-El contacto usa `/api/v1/contact`, headers JSON y honeypot. Mantiene los datos ante errores, confirma y limpia el formulario en 200/201/202, y localiza los errores al idioma actual. La URL `/api/contact` de la maqueta estática no se reutiliza.
+Las pruebas del contrato usan respuestas reales ES/EN de `http://gateway/api/v1/portfolio`. Para ejecutarlas con Node en el host, define `PORTFOLIO_TEST_API_URL=http://localhost/api/v1/portfolio` y ejecuta el mismo archivo con `node --experimental-strip-types --test`.
 
-GTM GTM-KC75DLJW, canonical https://felixsaucedo.com/ y schema ProfilePage se conservan. Títulos/descripción reflejan el rol Senior Software Engineer de la nueva referencia. Descripción y locale cambian con el idioma.
-
-Los enlaces del CV alternan `/Felix_Saucedo_CV_Base.pdf` y `/Felix_Saucedo_CV_Base_EN.pdf`. Estos PDF todavía no se incorporaron a public/. Existen originales en el repositorio documental, dentro de artifacts/cv/es/ y artifacts/cv/en/; no se copiaron documentos adicionales como parte del cambio de colores e idioma.
-
-[Auditoría](docs/AUDIT.md) · [Código completo](docs/SPA_CODE.md) · [Vista clara](docs/preview-light.png) · [Vista oscura](docs/preview-desktop.png)
+[`browser-audit.cjs`](tests/browser-audit.cjs) añade comprobaciones en Chromium: contenido, colores calculados, interlineado, filtros, cambios de idioma y tema, teclado, persistencia, ancho móvil y recuperación de errores. Usa Playwright en un contenedor de pruebas separado; no es una dependencia de la SPA. Las llamadas de contacto se simulan y GTM se bloquea durante esa auditoría para no generar envíos ni actividad de analítica.
