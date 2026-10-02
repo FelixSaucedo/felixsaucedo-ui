@@ -62,6 +62,3 @@ export interface ContactPayload {
   message: string
   _hp_company_url: string
 }
-
-export type ContactField = Exclude<keyof ContactPayload, '_hp_company_url'>
-export type ContactErrors = Partial<Record<ContactField, string>>

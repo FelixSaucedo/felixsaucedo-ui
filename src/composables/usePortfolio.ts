@@ -1,6 +1,13 @@
+/**
+ * Félix Saucedo — Senior Software Engineer & Technical Lead
+ * Portfolio Client UI (Vue 3.5 / Tailwind v4)
+ * [https://github.com/FelixSaucedo](https://github.com/FelixSaucedo)
+ */
+
 import { computed, onScopeDispose, ref, shallowRef, watch } from 'vue'
 import { getCopy } from '../lib/copy'
 import { emptyPortfolio } from '../lib/portfolio'
+import { readPreference, writePreference } from '../lib/preferences'
 import { parsePortfolio } from '../lib/portfolioContract'
 import type {
   Language,
@@ -10,22 +17,8 @@ import type {
 const languageKey = 'site_lang'
 
 function savedLanguage(): Language {
-  try {
-    const saved =
-      localStorage.getItem(languageKey) ??
-      localStorage.getItem('felix-portfolio-language')
-    return saved === 'en' ? 'en' : 'es'
-  } catch {
-    return 'es'
-  }
-}
-
-function persistLanguage(language: Language): void {
-  try {
-    localStorage.setItem(languageKey, language)
-  } catch {
-    return
-  }
+  const language = readPreference(languageKey) ?? readPreference('felix-portfolio-language')
+  return language === 'en' ? 'en' : 'es'
 }
 
 export function usePortfolio() {
@@ -67,14 +60,14 @@ export function usePortfolio() {
         },
       )
       if (!response.ok) throw new Error(`Portfolio request failed: HTTP ${response.status}`)
-      const payload = parsePortfolio(await response.json())
+      const portfolio = parsePortfolio(await response.json())
       if (requestId === sequence) {
-        cache.set(language, payload)
-        data.value = payload
+        cache.set(language, portfolio)
+        data.value = portfolio
       }
-    } catch (err) {
+    } catch (requestError) {
       if (requestId === sequence && (!controller.signal.aborted || timedOut)) {
-        console.error('[Portfolio Fetch Error]:', err)
+        console.error('[Portfolio Fetch Error]:', requestError)
         failure.value = timedOut ? 'timeout' : 'network'
       }
     } finally {
@@ -94,7 +87,7 @@ export function usePortfolio() {
     currentLang,
     (language) => {
       data.value = cache.get(language) ?? emptyPortfolio()
-      persistLanguage(language)
+      writePreference(languageKey, language)
       document.documentElement.lang = language
       void fetchPortfolio()
     },

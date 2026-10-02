@@ -59,9 +59,13 @@ const portfolio = shape({
   leadership: list(block), categories: list(category), skills: list(skill), career: list(milestone),
 } satisfies Record<keyof PortfolioResponse, Check>)
 
-export function parsePortfolio(value: unknown): PortfolioResponse {
-  const payload = record(value) ? value.data ?? value : value
-  const normalized = record(payload) ? { leadership: [], ...payload } : payload
-  if (!portfolio(normalized)) throw new Error('Invalid portfolio response')
-  return normalized as PortfolioResponse
+function isPortfolioResponse(response: unknown): response is PortfolioResponse {
+  return portfolio(response)
+}
+
+export function parsePortfolio(response: unknown): PortfolioResponse {
+  const portfolioData = record(response) ? response.data ?? response : response
+  const normalizedPortfolio = record(portfolioData) ? { leadership: [], ...portfolioData } : portfolioData
+  if (!isPortfolioResponse(normalizedPortfolio)) throw new Error('Invalid portfolio response')
+  return normalizedPortfolio
 }

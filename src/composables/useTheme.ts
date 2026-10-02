@@ -1,4 +1,5 @@
 import { onScopeDispose, ref, watch } from 'vue'
+import { readPreference, writePreference } from '../lib/preferences'
 
 export type Theme = 'light' | 'dark'
 
@@ -6,12 +7,9 @@ export function useTheme() {
   const currentTheme = ref<Theme>(
     document.documentElement.classList.contains('dark') ? 'dark' : 'light',
   )
-  const media = window.matchMedia('(prefers-color-scheme: dark)')
-  let explicitPreference = false
-  try {
-    const saved = localStorage.getItem('site_theme')
-    explicitPreference = saved === 'light' || saved === 'dark'
-  } catch {}
+  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+  const savedTheme = readPreference('site_theme')
+  let explicitPreference = savedTheme === 'light' || savedTheme === 'dark'
 
   function applyTheme(theme: Theme): void {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -26,14 +24,12 @@ export function useTheme() {
   function toggleTheme(): void {
     explicitPreference = true
     currentTheme.value = currentTheme.value === 'dark' ? 'light' : 'dark'
-    try {
-      localStorage.setItem('site_theme', currentTheme.value)
-    } catch {}
+    writePreference('site_theme', currentTheme.value)
   }
 
   watch(currentTheme, applyTheme, { immediate: true, flush: 'sync' })
-  media.addEventListener('change', followSystem)
-  onScopeDispose(() => media.removeEventListener('change', followSystem))
+  systemTheme.addEventListener('change', followSystem)
+  onScopeDispose(() => systemTheme.removeEventListener('change', followSystem))
 
   return { currentTheme, toggleTheme }
 }

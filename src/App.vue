@@ -1,4 +1,10 @@
 <script setup lang="ts">
+/**
+ * Félix Saucedo — Senior Software Engineer & Technical Lead
+ * Portfolio Client UI (Vue 3.5 / Tailwind v4)
+ * [https://github.com/FelixSaucedo](https://github.com/FelixSaucedo)
+ */
+
 import { computed, reactive, ref, watch } from "vue";
 import { usePortfolio } from "./composables/usePortfolio";
 import { useContact } from "./composables/useContact";
@@ -45,9 +51,9 @@ async function handleSubmit(): Promise<void> {
 }
 
 watch(
-  [currentLang, () => data.value?.hero?.body],
+  [currentLang, () => data.value.hero?.body],
   ([language, description]) => {
-    document.title = `Félix Saucedo | Senior Software Engineer`;
+    document.title = "Félix Saucedo | Senior Software Engineer";
     if (description) {
       for (const selector of [
         'meta[name="description"]',
@@ -66,10 +72,16 @@ watch(
   },
   { immediate: true },
 );
+const filterButtonClass =
+  "filter-btn px-3 py-1.5 rounded-lg border transition-colors";
 const activeFilterClass =
-  "filter-btn px-3 py-1.5 rounded-lg border border-sky-500 bg-sky-500/10 text-sky-600 dark:text-brand-accent transition-colors";
+  `${filterButtonClass} border-sky-500 bg-sky-500/10 text-sky-600 dark:text-brand-accent`;
 const inactiveFilterClass =
-  "filter-btn px-3 py-1.5 rounded-lg border border-slate-300 dark:border-brand-borderDark bg-white dark:bg-brand-cardDark hover:border-slate-400 dark:hover:border-slate-600 text-slate-600 dark:text-slate-400 transition-colors";
+  `${filterButtonClass} border-slate-300 dark:border-brand-borderDark bg-white dark:bg-brand-cardDark hover:border-slate-400 dark:hover:border-slate-600 text-slate-600 dark:text-slate-400`;
+
+const categoryAccentColors = computed(() =>
+  new Map(data.value.categories.map((category) => [category.slug, category.default_accent_color])),
+);
 
 const filteredSkills = computed(() =>
   data.value.skills
@@ -79,9 +91,7 @@ const filteredSkills = computed(() =>
     )
     .map((skill) => ({
       ...skill,
-      hoverColor: data.value.categories.find(
-        (category) => category.slug === skill.category_slug,
-      )?.default_accent_color ?? skill.accent_color,
+      hoverColor: categoryAccentColors.value.get(skill.category_slug) ?? skill.accent_color,
     })),
 );
 watch(
@@ -347,7 +357,7 @@ watch(
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div
-          v-for="(item, index) in data.philosophies"
+          v-for="(philosophy, index) in data.philosophies"
           :key="index"
           class="p-7 rounded-2xl bg-white dark:bg-brand-cardDark border border-brand-lightBorder dark:border-brand-borderDark shadow-sm flex flex-col justify-between h-full"
         >
@@ -355,19 +365,19 @@ watch(
             <div class="flex items-start gap-3.5 mb-3">
               <span
                 class="shrink-0 p-2 rounded-lg font-mono text-sm font-bold leading-none"
-                :style="{ color: item.accent_color_hex ?? undefined, backgroundColor: item.accent_color_hex ? item.accent_color_hex + '1a' : undefined }"
-                >{{ item.icon }}</span
+                :style="{ color: philosophy.accent_color_hex ?? undefined, backgroundColor: philosophy.accent_color_hex ? philosophy.accent_color_hex + '1a' : undefined }"
+                >{{ philosophy.icon }}</span
               >
               <h3
                 class="text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug"
               >
-                {{ item.title }}
+                {{ philosophy.title }}
               </h3>
             </div>
             <p
               class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed pt-1"
             >
-              {{ item.body }}
+              {{ philosophy.body }}
             </p>
           </div>
         </div>
@@ -398,7 +408,7 @@ watch(
 
       <div class="space-y-6">
         <div
-          v-for="(study, index) in data.case_studies"
+          v-for="(caseStudy, index) in data.case_studies"
           :key="index"
           class="p-8 rounded-2xl bg-white dark:bg-brand-cardDark border border-brand-lightBorder dark:border-brand-borderDark space-y-4 shadow-sm"
         >
@@ -406,12 +416,12 @@ watch(
             class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-brand-borderDark/60 pb-4"
           >
             <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">
-              {{ study.title }}
+              {{ caseStudy.title }}
             </h3>
             <span
               class="text-xs font-mono px-3 py-1 rounded border shrink-0"
-              :style="{ color: study.badge_color_hex, borderColor: study.badge_color_hex + '40', backgroundColor: study.badge_color_hex + '1a' }"
-              >{{ study.badge_text }}</span
+              :style="{ color: caseStudy.badge_color_hex, borderColor: caseStudy.badge_color_hex + '40', backgroundColor: caseStudy.badge_color_hex + '1a' }"
+              >{{ caseStudy.badge_text }}</span
             >
           </div>
           <div
@@ -423,7 +433,7 @@ watch(
                 data-i18n="label_problem"
                 >{{ copy.label_problem }}</strong
               >
-              <span>{{ study.problem }}</span>
+              <span>{{ caseStudy.problem }}</span>
             </div>
             <div>
               <strong
@@ -431,7 +441,7 @@ watch(
                 data-i18n="label_decision"
                 >{{ copy.label_decision }}</strong
               >
-              <span>{{ study.solution }}</span>
+              <span>{{ caseStudy.solution }}</span>
             </div>
           </div>
         </div>
@@ -465,15 +475,15 @@ watch(
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
         <div
-          v-for="(item, index) in data.leadership"
+          v-for="(leadershipPrinciple, index) in data.leadership"
           :key="index"
           class="space-y-2"
         >
           <h4 class="font-bold text-slate-900 dark:text-slate-200 text-base">
-            {{ item.title }}
+            {{ leadershipPrinciple.title }}
           </h4>
           <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            {{ item.body }}
+            {{ leadershipPrinciple.body }}
           </p>
         </div>
       </div>
@@ -527,7 +537,7 @@ watch(
             @click="selectedCategory = category.slug"
             :class="
               selectedCategory === category.slug
-                ? activeFilterClass
+                ? filterButtonClass
                 : inactiveFilterClass
             "
             :style="selectedCategory === category.slug ? { color: category.default_accent_color, borderColor: category.default_accent_color, backgroundColor: category.default_accent_color + '1a' } : undefined"

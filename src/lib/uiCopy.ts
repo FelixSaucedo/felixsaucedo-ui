@@ -7,7 +7,7 @@ const es = {
   btn_send: 'Enviar mensaje',
   btn_talk: 'Hablemos',
   contact_desc:
-    'Este formulario se conecta vía API JSON para comunicarse directamente conmigo.',
+    'Cuéntame sobre tu equipo, proyecto o desafío técnico.',
   contact_tag: 'Contacto Directo',
   contact_title: 'Conversemos sobre tu equipo o proyecto',
   field_email: 'Tu Correo *',
@@ -58,7 +58,7 @@ const en: UiCopy = {
   btn_cv_short: 'Resume',
   btn_send: 'Send Message',
   btn_talk: "Let's Talk",
-  contact_desc: 'This form connects via JSON API to reach my inbox directly.',
+  contact_desc: 'Tell me about your team, project, or engineering challenge.',
   contact_tag: 'Direct Contact',
   contact_title: "Let's discuss your team or next project",
   field_email: 'Your Email *',

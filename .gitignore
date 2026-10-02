@@ -6,6 +6,7 @@ dist-ssr/
 .vitest/
 coverage/
 *.tsbuildinfo
+.pint.cache
 *.local
 
 # Entorno y credenciales

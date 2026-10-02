@@ -1,1 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="9" fill="#020617"/><path d="M18 11h-3a4 4 0 0 0-4 4v14m-3-10h10m11-3h-5a3 3 0 0 0 0 6h2a3 3 0 0 1 0 6h-6" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 80">
+  <style>
+    rect { fill: #f1f5f9; stroke: #cbd5e1; }
+    path { stroke: #94a3b8; }
+    text { fill: #1e293b; }
+    line { stroke: #0284c7; }
+    @media (prefers-color-scheme: dark) {
+      rect { fill: #0f172a; stroke: #1e293b; }
+      path { stroke: #64748b; }
+      text { fill: #f8fafc; }
+      line { stroke: #38bdf8; }
+    }
+  </style>
+  <rect width="88" height="80" rx="18" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+  <circle cx="17" cy="17" r="3" fill="#10b981" />
+  <path d="M21 38 L14 45 L21 52" fill="none" stroke="#64748b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="26" y="52" font-family="monospace" font-weight="800" font-size="19" fill="#f8fafc">FS</text>
+  <line x1="61" y1="36" x2="55" y2="54" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" />
+  <path d="M68 38 L75 45 L68 52" fill="none" stroke="#64748b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
