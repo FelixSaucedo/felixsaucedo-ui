@@ -25,7 +25,7 @@ async function run() {
       assert.equal(await page.locator('#langToggle').getAttribute('aria-checked'), String(lang === 'en'))
       assert.equal(await page.locator('#name').getAttribute('placeholder'), expected.ph_name)
       assert.equal(await page.locator('#message').getAttribute('placeholder'), expected.ph_msg)
-      assert.equal(await page.locator('#heroCvBtn').getAttribute('href'), lang === 'es' ? '/Felix_Saucedo_CV_Base.pdf' : '/Felix_Saucedo_CV_Base_EN.pdf')
+      assert.equal(await page.locator('#heroCvBtn').getAttribute('href'), lang === 'es' ? '/Felix_Saucedo.pdf' : '/Felix_Saucedo_EN.pdf')
     }
     const api = {}
     for (const lang of ['es', 'en']) api[lang] = await (await context.request.get(`http://gateway/api/v1/portfolio?lang=${lang}`)).json()
@@ -138,15 +138,15 @@ async function run() {
       posted = route.request().postDataJSON()
       assert.equal(route.request().headers().accept, 'application/json')
       assert.equal(route.request().headers()['content-type'], 'application/json')
-      await route.fulfill({ status, headers: status === 429 ? { 'Retry-After': '180' } : {}, contentType: 'application/json', body: JSON.stringify(status === 422 ? { errors: { email: ['Invalid email'] } } : {}) })
+      await route.fulfill({ status, headers: status === 429 ? { 'Retry-After': '180' } : {}, contentType: 'application/json', body: JSON.stringify(status === 422 ? { errors: { email: ['Invalid email'] } } : status === 201 ? { success: true, message: 'Saved' } : status === 202 ? { success: true, message: 'Saved', notification_status: 'pending' } : {}) })
     })
     for (status of [200, 201, 202, 422, 429, 500]) {
       await page.locator('#name').fill('QA audit')
       await page.locator('#email').fill('qa@example.com')
       await page.locator('#message').fill('Review the approved architecture and contact intake.')
       await page.locator('#submitBtn').click()
-      if (status <= 202) {
-        await page.getByText('✓ Message sent successfully.', { exact: true }).waitFor()
+      if (status === 201 || status === 202) {
+        await page.locator('#formStatus').waitFor()
         assert.equal(await page.locator('#name').inputValue(), '')
       } else {
         await page.getByRole('alert').waitFor()

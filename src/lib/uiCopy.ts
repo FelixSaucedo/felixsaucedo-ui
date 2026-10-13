@@ -16,7 +16,7 @@ const es = {
   field_subject: 'Motivo de Contacto',
   footer_copy:
     '© 2026 Félix Saucedo · Diseñado para complementar mi perfil profesional.',
-  inbox_alt: 'O escribe directamente a mi bandeja:',
+  inbox_alt: 'O escribe directamente a:',
   label_decision: 'La decisión aplicada:',
   label_problem: 'El dilema técnico:',
   nav_decisions: 'Criterio Técnico',
@@ -67,7 +67,7 @@ const en: UiCopy = {
   field_subject: 'Contact Reason',
   footer_copy:
     '© 2026 Félix Saucedo · Designed to complement my professional engineering profile.',
-  inbox_alt: 'Or reach out directly via email:',
+  inbox_alt: 'Or email me directly at:',
   label_decision: 'The implemented strategy:',
   label_problem: 'The technical dilemma:',
   nav_decisions: 'Technical Decisions',
@@ -92,7 +92,7 @@ const en: UiCopy = {
   sec3_tag: 'Leadership & Collaboration',
   sec3_title: 'How I contribute as a Hands-on Lead',
   sec4_desc:
-    'My resume highlights primary tools; here is the broader spectrum of languages, engines, cloud services, and protocols I have operated in production.',
+    'My resume highlights my primary tools; here is the broader spectrum of languages, engines, cloud services, and protocols I have operated in production.',
   sec4_tag: 'Technical Ecosystem',
   sec4_title: 'Tools & Technologies across my career',
   sec5_tag: 'Career Summary',

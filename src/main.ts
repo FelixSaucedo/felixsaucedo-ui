@@ -1,11 +1,18 @@
 /**
  * Félix Saucedo — Senior Software Engineer & Technical Lead
- * Portfolio Client UI (Vue 3.5 / Tailwind v4)
- * [https://github.com/FelixSaucedo](https://github.com/FelixSaucedo)
+ * Architecture & High-Throughput Core Engineering
+ * GitHub: [https://github.com/FelixSaucedo](https://github.com/FelixSaucedo)
+ * Site: [felixsaucedo.com](https://felixsaucedo.com/)
  */
 
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
+import NotFound from './components/NotFound.vue'
 
-createApp(App).mount('#app')
+const isHome = window.location.pathname === '/' || window.location.pathname === '/index.html'
+if (!isHome) {
+  const robots = document.querySelector('meta[name="robots"]')
+  robots?.setAttribute('content', 'noindex, nofollow')
+}
+createApp(isHome ? App : NotFound).mount('#app')

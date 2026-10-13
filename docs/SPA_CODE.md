@@ -21,8 +21,8 @@ const copy = computed(() => getUiCopy(currentLang.value));
 const selectedCategory = ref("all");
 const cvHref = computed(() =>
   currentLang.value === "es"
-    ? "/Felix_Saucedo_CV_Base.pdf"
-    : "/Felix_Saucedo_CV_Base_EN.pdf",
+    ? "/Felix_Saucedo.pdf"
+    : "/Felix_Saucedo_EN.pdf",
 );
 const themeLabel = computed(() =>
   currentLang.value === "es"
@@ -937,9 +937,9 @@ watch(
           <p data-i18n="inbox_alt">{{ copy.inbox_alt }}</p>
           <p class="text-slate-700 dark:text-slate-300">
             <a
-              href="mailto:felix.saucedo.mendiola@gmail.com"
+              href="mailto:contacto@felixsaucedo.com"
               class="hover:text-sky-500 transition-colors underline underline-offset-4"
-              >felix.saucedo.mendiola@gmail.com</a
+              >contacto@felixsaucedo.com</a
             >
           </p>
         </div>
@@ -1049,7 +1049,7 @@ const es = {
   field_subject: 'Motivo de Contacto',
   footer_copy:
     '© 2026 Félix Saucedo · Diseñado para complementar mi perfil profesional.',
-  inbox_alt: 'O escribe directamente a mi bandeja:',
+  inbox_alt: 'O escribe directamente a:',
   label_decision: 'La decisión aplicada:',
   label_problem: 'El dilema técnico:',
   nav_decisions: 'Criterio Técnico',
@@ -1100,7 +1100,7 @@ const en: UiCopy = {
   field_subject: 'Contact Reason',
   footer_copy:
     '© 2026 Félix Saucedo · Designed to complement my professional engineering profile.',
-  inbox_alt: 'Or reach out directly via email:',
+  inbox_alt: 'Or email me directly at:',
   label_decision: 'The implemented strategy:',
   label_problem: 'The technical dilemma:',
   nav_decisions: 'Technical Decisions',
@@ -1907,7 +1907,6 @@ export function parsePortfolio(value: unknown): PortfolioResponse {
         document.documentElement.style.colorScheme = 'dark'
       }
     </script>
-    <!-- Google Tag Manager -->
     <script>
       ;(function (w, d, s, l, i) {
         w[l] = w[l] || []
@@ -1920,8 +1919,6 @@ export function parsePortfolio(value: unknown): PortfolioResponse {
         f.parentNode.insertBefore(j, f)
       })(window, document, 'script', 'dataLayer', 'GTM-KC75DLJW')
     </script>
-    <!-- End Google Tag Manager -->
-
     <link
       rel="icon"
       type="image/svg+xml"
@@ -1944,8 +1941,6 @@ export function parsePortfolio(value: unknown): PortfolioResponse {
       content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
     />
     <link rel="canonical" href="https://felixsaucedo.com/" />
-
-    <!-- Open Graph / Redes Sociales -->
     <meta property="og:type" content="profile" />
     <meta
       property="og:title"
@@ -1958,8 +1953,6 @@ export function parsePortfolio(value: unknown): PortfolioResponse {
     <meta property="og:url" content="https://felixsaucedo.com/" />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:locale:alternate" content="en_US" />
-
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
@@ -1969,8 +1962,6 @@ export function parsePortfolio(value: unknown): PortfolioResponse {
       name="twitter:description"
       content="Mi CV resume mis más de 12 años en desarrollo y liderazgo técnico. Este espacio muestra lo que no cabe en dos páginas: mi criterio para tomar decisiones de arquitectura, mi obsesión por la simplicidad y la forma en que colaboro para hacerle la vida más fácil al equipo y al negocio."
     />
-
-    <!-- JSON-LD Estructurado Schema.org -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -1997,7 +1988,6 @@ export function parsePortfolio(value: unknown): PortfolioResponse {
   <body
     class="bg-brand-lightBg dark:bg-brand-dark text-slate-700 dark:text-slate-300 font-sans antialiased transition-colors duration-200 selection:bg-brand-accent/20 selection:text-brand-accent"
   >
-    <!-- Google Tag Manager (noscript) -->
     <noscript
       ><iframe
         src="https://www.googletagmanager.com/ns.html?id=GTM-KC75DLJW"
@@ -2006,8 +1996,6 @@ export function parsePortfolio(value: unknown): PortfolioResponse {
         style="display: none; visibility: hidden"
       ></iframe
     ></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

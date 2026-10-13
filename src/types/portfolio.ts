@@ -56,6 +56,8 @@ export interface PortfolioResponse {
 }
 
 export interface ContactPayload {
+  locale?: Language
+  theme?: 'light' | 'dark'
   name: string
   email: string
   subject: string

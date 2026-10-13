@@ -1,8 +1,9 @@
 <script setup lang="ts">
 /**
  * Félix Saucedo — Senior Software Engineer & Technical Lead
- * Portfolio Client UI (Vue 3.5 / Tailwind v4)
- * [https://github.com/FelixSaucedo](https://github.com/FelixSaucedo)
+ * Architecture & High-Throughput Core Engineering
+ * GitHub: [https://github.com/FelixSaucedo](https://github.com/FelixSaucedo)
+ * Site: [felixsaucedo.com](https://felixsaucedo.com/)
  */
 
 import { computed, reactive, ref, watch } from "vue";
@@ -14,7 +15,7 @@ import { getUiCopy } from "./lib/uiCopy";
 import type { ContactPayload } from "./types/portfolio";
 
 const { data, loading, error, currentLang, toggleLanguage, fetchPortfolio } = usePortfolio();
-const { submitting, success, errorMessage, sendContact } =
+const { submitting, success, errorMessage, notificationPending, validationErrors, sendContact } =
   useContact(currentLang);
 const { currentTheme, toggleTheme } = useTheme();
 const copy = computed(() => getUiCopy(currentLang.value));
@@ -22,8 +23,8 @@ const portfolioCopy = computed(() => getCopy(currentLang.value));
 const selectedCategory = ref("all");
 const cvHref = computed(() =>
   currentLang.value === "es"
-    ? "/Felix_Saucedo_CV_Base.pdf"
-    : "/Felix_Saucedo_CV_Base_EN.pdf",
+    ? "/Felix_Saucedo.pdf"
+    : "/Felix_Saucedo_EN.pdf",
 );
 const themeLabel = computed(() =>
   currentLang.value === "es"
@@ -39,7 +40,17 @@ const contactForm = reactive<ContactPayload>({
 });
 
 async function handleSubmit(): Promise<void> {
-  if (await sendContact({ ...contactForm })) {
+  const subjectLabels: Record<string, string> = {
+    oportunidad: copy.value.opt_job,
+    proyecto: copy.value.opt_consult,
+    otro: copy.value.opt_other,
+  };
+  if (await sendContact({
+    ...contactForm,
+    subject: subjectLabels[contactForm.subject] ?? contactForm.subject,
+    locale: currentLang.value,
+    theme: currentTheme.value,
+  })) {
     Object.assign(contactForm, {
       name: "",
       email: "",
@@ -676,9 +687,11 @@ watch(
                 type="text"
                 id="name"
                 name="name"
-                maxlength="100"
+                maxlength="120"
                 autocomplete="name"
                 v-model="contactForm.name"
+                :aria-invalid="!!validationErrors.name?.length"
+                :class="{ 'ring-2 ring-red-500': validationErrors.name?.length }"
                 :disabled="submitting"
                 required
                 :placeholder="copy.ph_name"
@@ -696,9 +709,11 @@ watch(
                 type="email"
                 id="email"
                 name="email"
-                maxlength="255"
+                maxlength="150"
                 autocomplete="email"
                 v-model="contactForm.email"
+                :aria-invalid="!!validationErrors.email?.length"
+                :class="{ 'ring-2 ring-red-500': validationErrors.email?.length }"
                 :disabled="submitting"
                 required
                 :placeholder="
@@ -722,6 +737,8 @@ watch(
               id="subject"
               name="subject"
               v-model="contactForm.subject"
+                :aria-invalid="!!validationErrors.subject?.length"
+                :class="{ 'ring-2 ring-red-500': validationErrors.subject?.length }"
               :disabled="submitting"
               class="w-full px-4 py-3 rounded-lg bg-slate-50 dark:bg-brand-dark border border-slate-300 dark:border-brand-borderDark text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 transition-colors text-sm"
             >
@@ -750,6 +767,8 @@ watch(
               minlength="15"
               maxlength="3000"
               v-model="contactForm.message"
+                :aria-invalid="!!validationErrors.message?.length"
+                :class="{ 'ring-2 ring-red-500': validationErrors.message?.length }"
               :disabled="submitting"
               rows="4"
               required
@@ -762,7 +781,7 @@ watch(
             v-model="contactForm._hp_company_url"
             type="text"
             name="_hp_company_url"
-            class="hidden"
+            style="position: absolute; left: -9999px;"
             tabindex="-1"
             autocomplete="off"
             aria-hidden="true"
@@ -774,9 +793,13 @@ watch(
             class="p-4 rounded-lg text-xs font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 block"
           >
             {{
-              currentLang === "es"
-                ? "✓ Mensaje enviado correctamente."
-                : "✓ Message sent successfully."
+              notificationPending
+                ? (currentLang === "es"
+                    ? "✓ Mensaje guardado. La confirmación por correo está pendiente; no necesitas reenviarlo."
+                    : "✓ Message saved. Email confirmation is pending; you do not need to resend it.")
+                : (currentLang === "es"
+                    ? "✓ Mensaje recibido correctamente."
+                    : "✓ Message received successfully.")
             }}
           </div>
           <div
@@ -785,6 +808,11 @@ watch(
             class="p-4 rounded-lg text-xs font-mono bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-300"
           >
             {{ errorMessage }}
+            <ul v-if="Object.keys(validationErrors).length" class="mt-2 list-disc pl-4">
+              <template v-for="(messages, field) in validationErrors" :key="field">
+                <li v-for="message in messages" :key="message">{{ message }}</li>
+              </template>
+            </ul>
           </div>
 
           <button
@@ -822,9 +850,9 @@ watch(
           <p data-i18n="inbox_alt">{{ copy.inbox_alt }}</p>
           <p class="text-slate-700 dark:text-slate-300">
             <a
-              href="mailto:felix.saucedo.mendiola@gmail.com"
+              href="mailto:contacto@felixsaucedo.com"
               class="hover:text-sky-500 transition-colors underline underline-offset-4"
-              >felix.saucedo.mendiola@gmail.com</a
+              >contacto@felixsaucedo.com</a
             >
           </p>
         </div>

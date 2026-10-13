@@ -1,7 +1,8 @@
 /**
  * Félix Saucedo — Senior Software Engineer & Technical Lead
- * Portfolio Client UI (Vue 3.5 / Tailwind v4)
- * [https://github.com/FelixSaucedo](https://github.com/FelixSaucedo)
+ * Architecture & High-Throughput Core Engineering
+ * GitHub: [https://github.com/FelixSaucedo](https://github.com/FelixSaucedo)
+ * Site: [felixsaucedo.com](https://felixsaucedo.com/)
  */
 
 import { computed, onScopeDispose, ref, shallowRef, watch } from 'vue'
@@ -59,7 +60,7 @@ export function usePortfolio() {
           signal: controller.signal,
         },
       )
-      if (!response.ok) throw new Error(`Portfolio request failed: HTTP ${response.status}`)
+      if (response.status !== 200) throw new Error(`Portfolio request failed: HTTP ${response.status}`)
       const portfolio = parsePortfolio(await response.json())
       if (requestId === sequence) {
         cache.set(language, portfolio)
