@@ -1,12 +1,41 @@
 # felixsaucedo-ui
 
-Construí la interfaz de mi portafolio con Vue 3.5, TypeScript estricto, Vite 8 y Tailwind CSS 4. Presenta mi experiencia, decisiones de arquitectura y forma de trabajar, con descarga de CV y formulario de contacto.
+Esta es la interfaz de [mi sitio personal](https://felixsaucedo.com). Aquí presento mi experiencia, proyectos y forma de trabajar, junto con mis CV y el formulario de contacto.
 
-Partí de una maqueta HTML y mantuve el monograma, las tipografías y la estructura de secciones al llevarla a Vue. El contenido profesional llega desde mi API Laravel; aquí mantengo la presentación y la interacción, con versiones en español e inglés y temas claro y oscuro.
+Partí de una maqueta HTML y la llevé a Vue, conservando el monograma, las tipografías y la organización de las secciones. El contenido llega desde mi API en Laravel; en este repositorio trabajo en cómo se ve el sitio y cómo se usa.
 
-## Desarrollo
+## Tecnologías
 
-Normalmente trabajo desde [portfolio-workspace](https://github.com/FelixSaucedo/portfolio-workspace), donde Nginx sirve API y UI bajo el mismo origen. Con la API inicializada, uso estos comandos desde la raíz del workspace:
+| Tecnología | Uso |
+| --- | --- |
+| Vue 3.5 | Organiza la interfaz en componentes y actualiza lo que se muestra al cambiar los datos. |
+| TypeScript | Me ayuda a detectar errores en el uso de los datos antes de publicar. |
+| Vite 8 | Muestra los cambios mientras trabajo y prepara los archivos para publicar el sitio. |
+| Tailwind CSS 4 | Lo uso para los estilos, los tamaños y la adaptación a distintas pantallas. |
+
+Mientras trabajo en la interfaz, Vite muestra los cambios en el navegador sin que tenga que actualizar la página manualmente. Para publicar, compilo la aplicación y sirvo los archivos generados con Nginx.
+
+## Organización
+
+Mantengo separadas las secciones del sitio, la carga de contenido y el envío del formulario:
+
+| Archivo | Función |
+| --- | --- |
+| [App.vue](src/App.vue) | Organiza las secciones, el formulario y los controles de idioma, tema y CV. |
+| [usePortfolio.ts](src/composables/usePortfolio.ts) | Pide el contenido a la API según el idioma seleccionado. |
+| [portfolioContract.ts](src/lib/portfolioContract.ts) | Comprueba que los datos recibidos tengan el formato que espera la interfaz. |
+| [uiCopy.ts](src/lib/uiCopy.ts) y [copy.ts](src/lib/copy.ts) | Contienen los textos de botones, etiquetas y mensajes en español e inglés. |
+| [useTheme.ts](src/composables/useTheme.ts) | Aplica el tema claro u oscuro según la preferencia del sistema o la selección manual. |
+| [useContact.ts](src/composables/useContact.ts) | Envía el formulario y muestra el resultado. |
+| [NotFound.vue](src/components/NotFound.vue) | Muestra una página con regreso al inicio cuando la dirección no existe. |
+
+Los textos sobre mi experiencia y mis proyectos están en la API. Los botones, etiquetas y mensajes de la interfaz quedan aquí, para poder ajustarlos junto con la presentación.
+
+## Desarrollo local
+
+Normalmente trabajo desde [portfolio-workspace](https://github.com/FelixSaucedo/portfolio-workspace), donde ejecuto la API y la interfaz juntas con Docker.
+
+Con la API y su contenido ya preparados, uso estos comandos desde la carpeta del workspace:
 
 ```bash
 docker compose up -d --build
@@ -14,87 +43,78 @@ docker compose exec ui npm test
 docker compose exec ui npm run build
 ```
 
-El sitio se sirve en `http://localhost`. Vite usa HMR y polling sobre los archivos montados.
+El sitio queda disponible en `http://localhost`. El README del workspace explica cómo preparar el proyecto completo.
 
-Si necesito ejecutar la UI directamente con Node 22.18+ o Node 24, trabajo desde este repositorio:
+También puedo trabajar directamente desde este repositorio con Node 22.18 o posterior de la rama 22, o con Node 24. Si la API está disponible en `http://localhost:8080`, ejecuto:
 
 ```bash
 npm ci
 API_PROXY_TARGET=http://localhost:8080 npm run dev
 ```
 
-También mantengo un Compose autónomo que publica Vite en `http://localhost:5173`. Su proxy espera la API en `host.docker.internal:8080`; ajusto `API_PROXY_TARGET` si uso otra dirección. Las solicitudes del cliente son relativas y los composables actuales no utilizan `VITE_API_BASE_URL`.
+Después puedo abrir la interfaz en `http://localhost:5173`. `npm ci` instala las dependencias del proyecto y `npm run dev` inicia Vite. Si ejecuto la API en otra dirección, ajusto `API_PROXY_TARGET`.
 
-## Contenido y preferencias
+## Idioma, tema y navegación
 
-| Archivo | Responsabilidad |
-| --- | --- |
-| [`App.vue`](src/App.vue) | Secciones, formulario, selectores y descarga de CV. |
-| [`usePortfolio.ts`](src/composables/usePortfolio.ts) | Carga de contenido, cancelación, caché por idioma y timeout de 12 segundos. |
-| [`portfolioContract.ts`](src/lib/portfolioContract.ts) | Validación del JSON y de los colores HEX recibidos. |
-| [`uiCopy.ts`](src/lib/uiCopy.ts), [`copy.ts`](src/lib/copy.ts) | Rótulos ES/EN y mensajes de interacción. |
-| [`useTheme.ts`](src/composables/useTheme.ts) | Preferencia de sistema y selección manual de tema. |
+El sitio tiene versiones en español e inglés, y temas claro y oscuro. Guardo la selección en el navegador para conservarla al volver a visitar la página.
 
-Mantengo el contenido profesional en la base de datos y el seeder de la API. Los rótulos y mensajes de interacción quedan en `uiCopy.ts` y `copy.ts`.
+Dejé los accesos a CV y contacto en la cabecera, y los controles de idioma y tema en una barra fija. Así puedo mantenerlos disponibles sin llenar la navegación de botones.
 
-Valido el JSON antes de renderizarlo: TypeScript no comprueba respuestas de red. La carga requiere `200`; los errores, timeouts y respuestas inválidas permiten reintentar.
+Uso enlaces a las secciones porque el portafolio se recorre dentro de una misma página. Si alguien abre una dirección que no existe, muestro una página con un botón para volver al inicio.
 
-Dejé CV y contacto en el header, e idioma y tema en un dock fijo para reducir la cantidad de controles en la navegación. Guardo las preferencias en `site_lang` y `site_theme`; si `localStorage` está bloqueado, se aplican en memoria.
+La API entrega los colores de cada categoría y la interfaz decide cómo aplicarlos a los fondos, textos y demás elementos. Esto me permite ajustar los acentos sin cambiar los estilos de cada sección.
 
-Para los acentos consumo colores `#RRGGBB` de la API y defino los fondos, el contraste y el layout en la UI. Así puedo cambiar un acento en la base sin reconstruir un catálogo de clases CSS.
+Antes de mostrar el contenido, reviso el formato de los datos recibidos. TypeScript ayuda durante el desarrollo, pero las respuestas de la API también necesitan esa comprobación. Si no puedo cargar el contenido, muestro un mensaje y la opción de reintentar.
 
-Como el sitio se recorre por secciones, mantuve la navegación con anclas. Para direcciones distintas de `/` y `/index.html` muestro [`NotFound.vue`](src/components/NotFound.vue), con regreso al inicio y `noindex`. Nginx conserva el fallback a `index.html`; los assets y PDF ausentes reciben un 404 de servidor.
+## Formulario de contacto
 
-## Contacto
+Al enviar el formulario, incluyo el texto del motivo elegido, el idioma y el tema. Así los correos reflejan lo que la persona vio al escribir.
 
-En [`useContact.ts`](src/composables/useContact.ts) mantengo el envío del formulario. Conservo el texto completo del motivo seleccionado, el idioma y el tema para que los correos reflejen lo que la persona vio al escribir. El honeypot `_hp_company_url` viaja vacío en un envío legítimo. Mi dirección de contacto es [contacto@felixsaucedo.com](mailto:contacto@felixsaucedo.com).
+Mientras envío el mensaje, deshabilito el botón para evitar envíos repetidos. Si hay un error, conservo lo escrito y muestro qué ocurrió: un campo por corregir, demasiados intentos o un problema de conexión.
 
-El formulario conserva lo escrito ante un fallo y controla estos estados:
+La confirmación indica que el mensaje quedó guardado. Si los correos siguen pendientes, lo explico sin pedir que se vuelva a enviar el formulario.
 
-- Deshabilita controles durante el envío e impide solicitudes simultáneas.
-- Aplica un timeout de 15 segundos y cancela la petición al desmontar el componente.
-- Acepta `201` solo con confirmación JSON válida; `202` indica contacto guardado con correo pendiente.
-- Resalta campos ante `422` e interpreta `Retry-After` ante `429`.
-- Conserva lo escrito cuando falla la petición y evita presentar un error de red como éxito.
+También dejo mi dirección de contacto: [contacto@felixsaucedo.com](mailto:contacto@felixsaucedo.com).
 
-La confirmación que muestro acredita la recepción del mensaje. Cuando la API devuelve un `202`, explico que el correo está pendiente y que no hace falta reenviar: el contacto ya quedó guardado.
+## CV
 
-## CV y metadatos
-
-Mantengo mis dos CV en `public/`, con estos nombres para que los botones los encuentren:
+Guardo mis dos CV en `public/`, con estos nombres:
 
 | Idioma | Archivo |
 | --- | --- |
 | Español | `public/Felix_Saucedo.pdf` |
 | Inglés | `public/Felix_Saucedo_EN.pdf` |
 
-Los botones seleccionan mi CV según el idioma del sitio. Al compilar, Vite copia ambos documentos a `dist/`.
+El botón descarga el documento que corresponde al idioma seleccionado. Cuando compilo el sitio, Vite copia ambos PDF a `dist/`, la carpeta que contiene los archivos para publicar.
 
-En [`index.html`](index.html) mantengo canonical, Open Graph, Twitter Cards, Schema.org y Google Tag Manager. Actualizo el idioma y las descripciones al cargar contenido; la implementación sigue siendo una SPA, sin SSR ni prerendering.
+## Información del sitio
 
-## Pruebas y build
+En [index.html](index.html) mantengo el título, las descripciones y los datos que usan los buscadores y las vistas previas al compartir un enlace. También está la integración de Google Tag Manager para la analítica.
 
-```bash
-npm run build
-```
+Actualizo el idioma y las descripciones cuando se carga el contenido de la API.
 
-`npm run build` ejecuta `vue-tsc -b` antes de Vite. Un error de tipos detiene la compilación; publico el contenido de `dist/`.
+## Pruebas y compilación
 
-Con el workspace activo ejecuto también las pruebas:
+Desde el workspace ejecuto:
 
 ```bash
 docker compose exec ui npm test
 docker compose exec ui npm run build
 ```
 
-Para ejecutar las pruebas desde Node en el host, indico la dirección de la API:
+Si trabajo con Node directamente, indico la dirección de la API para las pruebas:
 
 ```bash
 PORTFOLIO_TEST_API_URL=http://localhost/api/v1/portfolio npm test
+npm run build
 ```
 
-Las pruebas cubren el contrato real ES/EN, preferencias, timeout, conexión perdida, doble envío y respuestas inválidas.
+Ajusto esa dirección si la API usa otro puerto. Las pruebas revisan el contenido en ambos idiomas, las preferencias del navegador y el formulario ante errores de conexión, respuestas inesperadas o envíos repetidos.
 
-Complemento esas pruebas con [`browser-security-audit.mjs`](tests/browser-security-audit.mjs), que usa Chromium instalado en `/ms-playwright`; en Docker necesita acceso al gateway y `QA_GATEWAY_IP` para resolver `localhost`. En [`browser-audit.cjs`](tests/browser-audit.cjs) mantengo la revisión visual con un runtime Playwright separado. En ambos casos simulo los envíos de contacto y bloqueo GTM para probar el sitio sin mandar correos ni generar actividad de analítica.
+`npm run build` primero revisa los tipos con `vue-tsc` y después compila con Vite. Si encuentra un error de tipos, detiene la compilación.
 
-Para producción compilo la aplicación con `Dockerfile.prod` y sirvo `dist/` con Nginx, usando caché inmutable para los assets con hash. En el README del workspace dejé los pasos del despliegue completo.
+También mantengo pruebas con Chromium y Playwright para revisar el sitio en el navegador. En ellas simulo las respuestas del formulario y desactivo la analítica, para no enviar correos reales ni registrar esas visitas.
+
+## Despliegue
+
+Publico la interfaz como parte de mi sitio en AWS. Uso `Dockerfile.prod` para compilarla y Nginx para servir los archivos de `dist/`. La configuración que une la interfaz con la API está en [portfolio-workspace](https://github.com/FelixSaucedo/portfolio-workspace).
